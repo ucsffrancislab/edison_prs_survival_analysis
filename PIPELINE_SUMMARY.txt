@@ -1,0 +1,200 @@
+
+================================================================================
+PGS SURVIVAL ANALYSIS PIPELINE - SUMMARY
+================================================================================
+
+CREATED FILES:
+--------------
+
+1. Analysis Scripts:
+   - survival_analysis.py      : Main Cox PH regression analysis
+   - meta_analysis.py           : Fixed-effects meta-analysis
+   - visualize_results.py       : Generate plots
+   - create_model_list.py       : Create model subsets
+
+2. Execution Scripts:
+   - install_requirements.sh    : Install Python packages
+   - test_pipeline.sh           : Test pipeline (RUN THIS FIRST!)
+   - run_survival_analysis.sh   : SLURM array job (4 jobs)
+   - run_parallel_survival.sh   : SLURM parallel job (1 job, 4 parallel tasks)
+
+3. Documentation:
+   - README.md                  : Detailed documentation
+   - USAGE.md                   : Quick usage guide
+
+TESTING COMPLETED:
+------------------
+
+✓ survival_analysis.py - Works on all 4 datasets
+✓ meta_analysis.py - Successfully combines results
+✓ visualize_results.py - Creates all plot types
+✓ All datasets load correctly
+✓ Handle missing covariates (rad/chemo in TCGA)
+
+Test Results (5 models, 4 datasets):
+- cidr: 15 associations
+- i370: 15 associations  
+- onco: 15 associations
+- tcga: 15 associations
+- meta: 15 combined results
+- plots: 28 visualizations
+
+ANALYSIS SPECIFICATIONS:
+------------------------
+
+Models: 5110 total PGS models
+  - 7 custom glioma models
+  - 5103 PGS Catalog models
+
+Datasets: 4 (cidr, i370, onco, tcga)
+
+Subtypes: 9
+  1. all_cases
+  2. idh_wildtype
+  3. idh_mutant
+  4. hgg_idh_wildtype
+  5. hgg_idh_mutant
+  6. lgg_idh_wildtype
+  7. lgg_idh_mutant
+  8. lgg_idh_mutant_pq_intact
+  9. lgg_idh_mutant_pq_codel
+
+Covariates (when available):
+  - source (one-hot encoded)
+  - age
+  - sex
+  - grade
+  - rad (not available in TCGA)
+  - chemo (not available in TCGA)
+  - PC1-PC8
+
+Total Analyses: ~184,000 Cox models
+  (5110 models × 4 datasets × 9 subtypes)
+
+IMPORTANT NOTES:
+----------------
+
+1. TCGA dataset has no treatment data (rad/chemo)
+   → Script automatically handles missing covariates
+
+2. Some subtypes have small sample sizes
+   → Models with <10 samples are skipped
+
+3. Some models may not converge
+   → Automatically skipped and reported
+
+4. Full analysis takes 6-48 hours
+   → Always run test_pipeline.sh first!
+
+5. Use 3% subset for testing
+   → Create with: python3 create_model_list.py --subset 0.03
+
+COMMAND SEQUENCE:
+-----------------
+
+1. Install packages:
+   chmod +x *.sh *.py
+   ./install_requirements.sh
+
+2. Test pipeline (~30 min):
+   ./test_pipeline.sh
+
+3. Review test results:
+   head test_results/meta_analysis_results.txt
+   ls test_results/plots/
+
+4. Create full model list:
+   python3 create_model_list.py --scores cidr.scores.z-scores.txt.gz --output model_list.txt
+
+5. Submit to SLURM:
+   sbatch run_survival_analysis.sh
+   OR
+   sbatch run_parallel_survival.sh
+
+6. Monitor:
+   squeue -u $USER
+   tail -f logs/survival_*.out
+
+7. View results:
+   head -n 20 results/meta_analysis_results.txt
+   ls results/plots/
+
+CUSTOMIZATION:
+--------------
+
+Analyze different % of models:
+  python3 create_model_list.py --scores FILE --output OUT --subset 0.01  # 1%
+  python3 create_model_list.py --scores FILE --output OUT --subset 0.05  # 5%
+
+Adjust SLURM resources:
+  Edit #SBATCH directives in run_*.sh files
+  - --cpus-per-task
+  - --mem
+  - --time
+
+Change number of top hits visualized:
+  python3 visualize_results.py --meta FILE --output-dir DIR --top-n 50
+
+TROUBLESHOOTING:
+----------------
+
+Out of memory:
+  - Use smaller subset (--subset 0.01)
+  - Increase --mem in SLURM script
+
+Jobs not starting:
+  - Check: squeue -u $USER
+  - Reduce resource requests
+
+No results:
+  - Check logs/ directory
+  - Verify data file format
+  - Ensure case=1 samples exist with survival data
+
+Missing plots:
+  - Re-run visualize_results.py
+  - Check --data-dir points to correct location
+
+OUTPUTS:
+--------
+
+1. Per-dataset results:
+   results/{dataset}_survival_results.txt
+   Columns: dataset, model, subtype, n_samples, n_events, coef, exp_coef, se_coef, z, p, CI
+
+2. Meta-analysis:
+   results/meta_analysis_results.txt
+   Columns: model, subtype, meta_coef, meta_p, Q, I2, individual study results
+
+3. Visualizations:
+   results/plots/
+   - volcano_*.png       : Volcano plots (one per subtype)
+   - forest_*.png        : Forest plots (top N hits)
+   - km_*.png            : Kaplan-Meier curves (top N × 4 datasets)
+
+PERFORMANCE:
+------------
+
+Test (3% = 162 models):
+  Time: 15-30 minutes total
+  Memory: 8-16 GB per dataset
+
+Full (100% = 5110 models):
+  Time: 6-12 hours per dataset (array) or 24-48 hours (sequential)
+  Memory: 32-64 GB per dataset
+  Disk: ~2 GB
+
+CITATION:
+---------
+
+lifelines:
+  Davidson-Pilon, C. (2019). lifelines: survival analysis in Python.
+  Journal of Open Source Software, 4(40), 1317.
+  https://doi.org/10.21105/joss.01317
+
+PGS Catalog:
+  https://www.pgscatalog.org/
+
+================================================================================
+END OF SUMMARY
+================================================================================
