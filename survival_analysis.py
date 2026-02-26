@@ -126,6 +126,20 @@ class SurvivalAnalysis:
         if len(cox_data) < 10:
             return None
         
+        # Remove covariates with zero variance (constant after filtering)
+        # These cause convergence issues in Cox models
+        zero_variance_cols = []
+        for col in cox_data.columns:
+            if col not in ['survdays', 'vstatus', model_name]:
+                if cox_data[col].nunique() == 1:
+                    zero_variance_cols.append(col)
+        
+        if zero_variance_cols:
+            cox_data = cox_data.drop(columns=zero_variance_cols)
+        
+        if len(cox_data) < 10:
+            return None
+        
         try:
             # Fit Cox PH model
             cph = CoxPHFitter(penalizer=0.0)
@@ -154,7 +168,7 @@ class SurvivalAnalysis:
                 return None
                 
         except (ConvergenceError, Exception) as e:
-            # Model didn't converge or other error
+            print("Model didn't converge or other error")
             return None
     
     def analyze_models(self, models: List[str], output_file: str) -> None:

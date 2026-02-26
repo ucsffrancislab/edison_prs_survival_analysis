@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --job-name=pgs_survival_parallel
-#SBATCH --output=logs/survival_parallel_%j.out
-#SBATCH --error=logs/survival_parallel_%j.err
+#SBATCH --output=survival_parallel_%j.out
+#SBATCH --error=survival_parallel_%j.err
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=64
-#SBATCH --mem=128G
+#SBATCH --mem=490G
 #SBATCH --time=48:00:00
 
 # PGS Survival Analysis - Single Large Parallel Job
@@ -44,7 +44,7 @@ run_dataset() {
     python3 survival_analysis.py \
         --dataset ${DATASET} \
         --scores ${DATA_DIR}/${DATASET}.scores.z-scores.txt.gz \
-        --covariates ${DATA_DIR}/${DATASET}-covariates.tsv \
+        --covariates ${DATA_DIR}/${DATASET}-covariates.csv \
         --models ${MODEL_LIST} \
         --output ${OUTPUT_DIR}/${DATASET}_survival_results.txt \
         > logs/${DATASET}_survival.log 2>&1
@@ -79,7 +79,7 @@ echo "Generating visualizations..."
 python3 visualize_results.py \
     --meta ${OUTPUT_DIR}/meta_analysis_results.txt \
     --output-dir ${OUTPUT_DIR}/plots \
-    --top-n 20 \
+    --top-n 100 \
     --data-dir ${DATA_DIR}
 
 echo "Visualizations completed"

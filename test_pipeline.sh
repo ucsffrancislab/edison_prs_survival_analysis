@@ -40,7 +40,7 @@ for DATASET in cidr i370 onco tcga; do
     python3 survival_analysis.py \
         --dataset ${DATASET} \
         --scores ${DATASET}.scores.z-scores.txt.gz \
-        --covariates ${DATASET}-covariates.tsv \
+        --covariates ${DATASET}-covariates.csv \
         --models test_model_list.txt \
         --output test_results/${DATASET}_survival_results.txt
     

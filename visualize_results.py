@@ -329,7 +329,7 @@ def main():
                 coef_col = f"{ds}_coef"
                 if coef_col in row.index and pd.notna(row[coef_col]):
                     scores_file = f"{args.data_dir}/{ds}.scores.z-scores.txt.gz"
-                    cov_file = f"{args.data_dir}/{ds}-covariates.tsv"
+                    cov_file = f"{args.data_dir}/{ds}-covariates.csv"
                     
                     if Path(scores_file).exists() and Path(cov_file).exists():
                         try:
