@@ -5,7 +5,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=64
 #SBATCH --mem=490G
-#SBATCH --time=48:00:00
+#SBATCH --time=14-0
 
 # PGS Survival Analysis - Single Large Parallel Job
 # This script runs all datasets in parallel using GNU parallel
