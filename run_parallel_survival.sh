@@ -21,8 +21,7 @@
 DATA_DIR="."
 OUTPUT_DIR="results"
 MODEL_LIST="model_list.txt"
-#N_JOBS=4  # One per dataset
-N_JOBS=3  # One per dataset
+N_JOBS=4  # One per dataset
 
 # Create output directory
 mkdir -p ${OUTPUT_DIR}
@@ -57,8 +56,7 @@ export -f run_dataset
 export DATA_DIR OUTPUT_DIR MODEL_LIST
 
 # Run all datasets in parallel
-#parallel -j ${N_JOBS} run_dataset ::: cidr i370 onco tcga
-parallel -j ${N_JOBS} run_dataset ::: i370 onco tcga
+parallel -j ${N_JOBS} run_dataset ::: cidr i370 onco tcga
 
 echo "=================================================="
 echo "All datasets completed"
@@ -66,9 +64,9 @@ echo "=================================================="
 
 # Run meta-analysis
 echo "Starting meta-analysis..."
-#    --input ${OUTPUT_DIR}/cidr_survival_results.txt \
 python3 meta_analysis.py \
-    --input ${OUTPUT_DIR}/i370_survival_results.txt \
+    --input ${OUTPUT_DIR}/cidr_survival_results.txt \
+            ${OUTPUT_DIR}/i370_survival_results.txt \
             ${OUTPUT_DIR}/onco_survival_results.txt \
             ${OUTPUT_DIR}/tcga_survival_results.txt \
     --output ${OUTPUT_DIR}/meta_analysis_results.txt
