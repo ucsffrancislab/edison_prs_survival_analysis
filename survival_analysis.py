@@ -26,20 +26,30 @@ except ImportError:
 class SurvivalAnalysis:
     """Class to perform Cox PH regression for PGS models"""
     
-    # Define subtypes as class variable
+    ## Define subtypes as class variable
+    #SUBTYPES = {
+    #    'all_cases': {'case': 1},
+    #    'idh_wildtype': {'case': 1, 'idh': 0},
+    #    'idh_mutant': {'case': 1, 'idh': 1},
+    #    'hgg_idh_wildtype': {'case': 1, 'grade': 'HGG', 'idh': 0},
+    #    'hgg_idh_mutant': {'case': 1, 'grade': 'HGG', 'idh': 1},
+    #    'lgg_idh_wildtype': {'case': 1, 'grade': 'LGG', 'idh': 0},
+    #    'lgg_idh_mutant': {'case': 1, 'grade': 'LGG', 'idh': 1},
+    #    'lgg_idh_mutant_pq_intact': {'case': 1, 'grade': 'LGG', 'idh': 1, 'pq': 0},
+    #    'lgg_idh_mutant_pq_codel': {'case': 1, 'grade': 'LGG', 'idh': 1, 'pq': 1}
+    #}
+    #
+    #COVARIATES = ['source', 'age', 'sex', 'grade', 'rad', 'chemo', 
+    #              'PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8']
+
     SUBTYPES = {
-        'all_cases': {'case': 1},
         'idh_wildtype': {'case': 1, 'idh': 0},
-        'idh_mutant': {'case': 1, 'idh': 1},
-        'hgg_idh_wildtype': {'case': 1, 'grade': 'HGG', 'idh': 0},
-        'hgg_idh_mutant': {'case': 1, 'grade': 'HGG', 'idh': 1},
-        'lgg_idh_wildtype': {'case': 1, 'grade': 'LGG', 'idh': 0},
-        'lgg_idh_mutant': {'case': 1, 'grade': 'LGG', 'idh': 1},
         'lgg_idh_mutant_pq_intact': {'case': 1, 'grade': 'LGG', 'idh': 1, 'pq': 0},
+        'hgg_idh_mutant_pq_intact': {'case': 1, 'grade': 'HGG', 'idh': 1, 'pq': 0},
         'lgg_idh_mutant_pq_codel': {'case': 1, 'grade': 'LGG', 'idh': 1, 'pq': 1}
     }
-    
-    COVARIATES = ['source', 'age', 'sex', 'grade', 'rad', 'chemo', 
+
+    COVARIATES = ['source', 'age', 'sex', 'grade', 'treated', 
                   'PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8']
     
     def __init__(self, dataset_name: str):
