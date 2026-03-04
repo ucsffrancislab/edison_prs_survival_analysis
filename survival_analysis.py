@@ -91,17 +91,22 @@ class SurvivalAnalysis:
         """
         # Filter to subtype
         subset = self.filter_subtype(filters)
+        print(f"  1 subset: {subset.shape}")
         
         if len(subset) < 10:  # Need minimum samples
+            print(f"  1 Subset too small. Skipping.")
             return None
         
         # Merge with scores
         subset = subset.merge(self.scores[['IID', model_name]], on='IID', how='inner')
+        print(f"  2 subset: {subset.shape}")
         
         # Remove rows with missing survival data
         subset = subset.dropna(subset=['survdays', 'vstatus', model_name])
+        print(f"  3 subset: {subset.shape}")
         
         if len(subset) < 10:
+            print(f"  2 Subset too small. Skipping.")
             return None
         
         # Prepare data for Cox model
@@ -129,11 +134,15 @@ class SurvivalAnalysis:
             available_covariates.remove('source')
             available_covariates.extend(source_dummies.columns.tolist())
         
+        print(f"  1 cox_data: {cox_data.shape}")
+
         # Drop rows with any missing data
         # This will remove rows where any of the available covariates are missing
         cox_data = cox_data.dropna()
+        print(f"  2 cox_data: {cox_data.shape}")
         
         if len(cox_data) < 10:
+            print(f"  1 cox_data too small. Skipping.")
             return None
         
         # Remove covariates with zero variance (constant after filtering)
@@ -147,7 +156,10 @@ class SurvivalAnalysis:
         if zero_variance_cols:
             cox_data = cox_data.drop(columns=zero_variance_cols)
         
+        print(f"  3 cox_data: {cox_data.shape}")
+
         if len(cox_data) < 10:
+            print(f"  2 cox_data too small. Skipping.")
             return None
         
         try:

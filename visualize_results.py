@@ -218,9 +218,13 @@ def create_km_curves(model: str, subtype: str, dataset_name: str,
     
     # Merge with scores
     df = df.merge(scores[['IID', model]], on='IID', how='inner')
+
+    print(f"  1 df: {df.shape}")$
     
     # Remove missing data
     df = df.dropna(subset=['survdays', 'vstatus', model])
+
+    print(f"  2 df: {df.shape}")$
     
     if len(df) < 20:
         print(f"Insufficient samples for KM plot: {dataset_name} - {model} - {subtype}")
@@ -234,14 +238,19 @@ def create_km_curves(model: str, subtype: str, dataset_name: str,
     fig, ax = plt.subplots(figsize=(10, 6))
     
     kmf = KaplanMeierFitter()
+
+    print("Building KM plot")
     
     for group in ['Low PRS', 'High PRS']:
+        print(f"  adding {group} to KM plot")
         mask = df['risk_group'] == group
         kmf.fit(df.loc[mask, 'survdays'], 
                 df.loc[mask, 'vstatus'],
                 label=f'{group} (n={mask.sum()})')
         kmf.plot_survival_function(ax=ax, ci_show=True)
     
+    print("  trying log rank test")
+
     # Log-rank test
     try:
         result = multivariate_logrank_test(
@@ -252,6 +261,8 @@ def create_km_curves(model: str, subtype: str, dataset_name: str,
         p_value = result.p_value
     except:
         p_value = np.nan
+
+    print("  adding labels")
     
     # Labels
     ax.set_xlabel('Time (days)', fontsize=12)
@@ -265,6 +276,7 @@ def create_km_curves(model: str, subtype: str, dataset_name: str,
     plt.tight_layout()
     
     # Save
+    print("  saving")
     safe_model = model.replace('/', '_').replace(' ', '_')
     output_file = f"{output_dir}/km_{dataset_name}_{safe_model}_{subtype}.png"
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
@@ -330,6 +342,8 @@ def main():
                 if coef_col in row.index and pd.notna(row[coef_col]):
                     scores_file = f"{args.data_dir}/{ds}.scores.z-scores.txt.gz"
                     cov_file = f"{args.data_dir}/{ds}-covariates.csv"
+
+
                     
                     if Path(scores_file).exists() and Path(cov_file).exists():
                         try:
@@ -343,3 +357,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
