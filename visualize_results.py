@@ -202,32 +202,38 @@ def create_km_curves(model: str, subtype: str, dataset_name: str,
     output_dir : str
         Directory to save plots
     """
+	print("create_km_curves",flush=True)
     # Load data
     scores = pd.read_csv(scores_file, sep=',')
+	print("scores",flush=True)
     covariates = pd.read_csv(covariates_file, sep=',')
+	print("covariates",flush=True)
     
     # Rename for merging
     sample_col = 'sample' if 'sample' in scores.columns else scores.columns[0]
+	print("sample_col",flush=True)
     scores.rename(columns={sample_col: 'IID'}, inplace=True)
+	print("scores.rename",flush=True)
     
     # Filter to subtype
     df = covariates.copy()
     for key, value in filters.items():
         if key in df.columns:
             df = df[df[key] == value]
+	print("for loop",flush=True)
     
     # Merge with scores
     df = df.merge(scores[['IID', model]], on='IID', how='inner')
 
-    print(f"  1 df: {df.shape}")$
+    print(f"  1 df: {df.shape}",flush=True)
     
     # Remove missing data
     df = df.dropna(subset=['survdays', 'vstatus', model])
 
-    print(f"  2 df: {df.shape}")$
+    print(f"  2 df: {df.shape}",flush=True)
     
     if len(df) < 20:
-        print(f"Insufficient samples for KM plot: {dataset_name} - {model} - {subtype}")
+        print(f"Insufficient samples for KM plot: {dataset_name} - {model} - {subtype}",flush=True)
         return
     
     # Split into high/low based on median
@@ -239,17 +245,17 @@ def create_km_curves(model: str, subtype: str, dataset_name: str,
     
     kmf = KaplanMeierFitter()
 
-    print("Building KM plot")
+    print("Building KM plot",flush=True)
     
     for group in ['Low PRS', 'High PRS']:
-        print(f"  adding {group} to KM plot")
+        print(f"  adding {group} to KM plot",flush=True)
         mask = df['risk_group'] == group
         kmf.fit(df.loc[mask, 'survdays'], 
                 df.loc[mask, 'vstatus'],
                 label=f'{group} (n={mask.sum()})')
         kmf.plot_survival_function(ax=ax, ci_show=True)
     
-    print("  trying log rank test")
+    print("  trying log rank test",flush=True)
 
     # Log-rank test
     try:
@@ -262,7 +268,7 @@ def create_km_curves(model: str, subtype: str, dataset_name: str,
     except:
         p_value = np.nan
 
-    print("  adding labels")
+    print("  adding labels",flush=True)
     
     # Labels
     ax.set_xlabel('Time (days)', fontsize=12)
@@ -276,13 +282,13 @@ def create_km_curves(model: str, subtype: str, dataset_name: str,
     plt.tight_layout()
     
     # Save
-    print("  saving")
+    print("  saving",flush=True)
     safe_model = model.replace('/', '_').replace(' ', '_')
     output_file = f"{output_dir}/km_{dataset_name}_{safe_model}_{subtype}.png"
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
     plt.close()
     
-    print(f"  Saved: {output_file}")
+    print(f"  Saved: {output_file}",flush=True)
 
 
 def main():
@@ -299,25 +305,25 @@ def main():
     
     # Load meta-analysis results
     meta_df = pd.read_csv(args.meta, sep='\t')
-    print(f"Loaded {len(meta_df)} meta-analysis results")
+    print(f"Loaded {len(meta_df)} meta-analysis results",flush=True)
     
     # Get unique subtypes
     subtypes = meta_df['subtype'].unique()
-    print(f"\nCreating volcano plots for {len(subtypes)} subtypes...")
+    print(f"\nCreating volcano plots for {len(subtypes)} subtypes...",flush=True)
     
     for subtype in subtypes:
         create_volcano_plot(meta_df, subtype, args.output_dir)
     
     # Get top N hits overall
     top_hits = meta_df.nsmallest(args.top_n, 'meta_p')
-    print(f"\nCreating forest plots for top {len(top_hits)} hits...")
+    print(f"\nCreating forest plots for top {len(top_hits)} hits...",flush=True)
     
     for i, row in top_hits.iterrows():
         create_forest_plot(meta_df, row['model'], row['subtype'], {}, args.output_dir)
     
     # KM plots if data directory provided
     if args.data_dir:
-        print(f"\nCreating KM curves for top {len(top_hits)} hits...")
+        print(f"\nCreating KM curves for top {len(top_hits)} hits...",flush=True)
         
         # Define subtype filters
         SUBTYPES = {
@@ -350,9 +356,9 @@ def main():
                             create_km_curves(model, subtype, ds, scores_file, cov_file,
                                            SUBTYPES[subtype], args.output_dir)
                         except Exception as e:
-                            print(f"Error creating KM for {ds}-{model}-{subtype}: {e}")
+                            print(f"Error creating KM for {ds}-{model}-{subtype}: {e}",flush=True)
     
-    print(f"\nAll visualizations saved to {args.output_dir}")
+    print(f"\nAll visualizations saved to {args.output_dir}",flush=True)
 
 
 if __name__ == '__main__':
