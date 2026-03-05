@@ -232,7 +232,8 @@ def create_km_curves(model: str, subtype: str, dataset_name: str,
 
     print(f"  2 df: {df.shape}",flush=True)
     
-    if len(df) < 20:
+    #if len(df) < 20:
+    if len(df) < 15:
         print(f"Insufficient samples for KM plot: {dataset_name} - {model} - {subtype}",flush=True)
         return
     
@@ -380,6 +381,6 @@ if __name__ == '__main__':
 #	scores.rename
 #	for loop
 #	  1 df: (20, 24)
-#	  2 df: (19, 24)   <-   20 is the cutoff
+#	  2 df: (19, 24)   <-   20 is the cutoff. Dropped to 15.
 #	Insufficient samples for KM plot: tcga - idhwt_scoring_system - hgg_idh_mutant_pq_intact
 
