@@ -17,7 +17,7 @@ try:
     from lifelines import KaplanMeierFitter
     from lifelines.statistics import multivariate_logrank_test
 except ImportError:
-    print("ERROR: lifelines package not found. Install with: pip install lifelines")
+    print("ERROR: lifelines package not found. Install with: pip install lifelines",flush=True)
     sys.exit(1)
 
 
@@ -38,7 +38,7 @@ def create_volcano_plot(meta_df: pd.DataFrame, subtype: str, output_dir: str):
     sub_df = meta_df[meta_df['subtype'] == subtype].copy()
     
     if len(sub_df) == 0:
-        print(f"No results for subtype: {subtype}")
+        print(f"No results for subtype: {subtype}",flush=True)
         return
     
     # Calculate -log10(p)
@@ -76,7 +76,7 @@ def create_volcano_plot(meta_df: pd.DataFrame, subtype: str, output_dir: str):
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
     plt.close()
     
-    print(f"  Saved: {output_file}")
+    print(f"  Saved: {output_file}",flush=True)
 
 
 def create_forest_plot(meta_df: pd.DataFrame, model: str, subtype: str, 
@@ -103,7 +103,7 @@ def create_forest_plot(meta_df: pd.DataFrame, model: str, subtype: str,
     meta_row = meta_df[(meta_df['model'] == model) & (meta_df['subtype'] == subtype)]
     
     if len(meta_row) == 0:
-        print(f"No meta-analysis result for {model} - {subtype}")
+        print(f"No meta-analysis result for {model} - {subtype}",flush=True)
         return
     
     meta_row = meta_row.iloc[0]
@@ -176,7 +176,7 @@ def create_forest_plot(meta_df: pd.DataFrame, model: str, subtype: str,
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
     plt.close()
     
-    print(f"  Saved: {output_file}")
+    print(f"  Saved: {output_file}",flush=True)
 
 
 def create_km_curves(model: str, subtype: str, dataset_name: str,
@@ -202,25 +202,25 @@ def create_km_curves(model: str, subtype: str, dataset_name: str,
     output_dir : str
         Directory to save plots
     """
-	print("create_km_curves",flush=True)
+    print("create_km_curves",flush=True)
     # Load data
     scores = pd.read_csv(scores_file, sep=',')
-	print("scores",flush=True)
+    print("scores",flush=True)
     covariates = pd.read_csv(covariates_file, sep=',')
-	print("covariates",flush=True)
+    print("covariates",flush=True)
     
     # Rename for merging
     sample_col = 'sample' if 'sample' in scores.columns else scores.columns[0]
-	print("sample_col",flush=True)
+    print("sample_col",flush=True)
     scores.rename(columns={sample_col: 'IID'}, inplace=True)
-	print("scores.rename",flush=True)
+    print("scores.rename",flush=True)
     
     # Filter to subtype
     df = covariates.copy()
     for key, value in filters.items():
         if key in df.columns:
             df = df[df[key] == value]
-	print("for loop",flush=True)
+    print("for loop",flush=True)
     
     # Merge with scores
     df = df.merge(scores[['IID', model]], on='IID', how='inner')
@@ -326,18 +326,26 @@ def main():
         print(f"\nCreating KM curves for top {len(top_hits)} hits...",flush=True)
         
         # Define subtype filters
+        #SUBTYPES = {
+        #    'all_cases': {'case': 1},
+        #    'idh_wildtype': {'case': 1, 'idh': 0},
+        #    'idh_mutant': {'case': 1, 'idh': 1},
+        #    'hgg_idh_wildtype': {'case': 1, 'grade': 'HGG', 'idh': 0},
+        #    'hgg_idh_mutant': {'case': 1, 'grade': 'HGG', 'idh': 1},
+        #    'lgg_idh_wildtype': {'case': 1, 'grade': 'LGG', 'idh': 0},
+        #    'lgg_idh_mutant': {'case': 1, 'grade': 'LGG', 'idh': 1},
+        #    'lgg_idh_mutant_pq_intact': {'case': 1, 'grade': 'LGG', 'idh': 1, 'pq': 0},
+        #    'lgg_idh_mutant_pq_codel': {'case': 1, 'grade': 'LGG', 'idh': 1, 'pq': 1}
+        #}
+        
         SUBTYPES = {
-            'all_cases': {'case': 1},
             'idh_wildtype': {'case': 1, 'idh': 0},
-            'idh_mutant': {'case': 1, 'idh': 1},
-            'hgg_idh_wildtype': {'case': 1, 'grade': 'HGG', 'idh': 0},
-            'hgg_idh_mutant': {'case': 1, 'grade': 'HGG', 'idh': 1},
-            'lgg_idh_wildtype': {'case': 1, 'grade': 'LGG', 'idh': 0},
-            'lgg_idh_mutant': {'case': 1, 'grade': 'LGG', 'idh': 1},
             'lgg_idh_mutant_pq_intact': {'case': 1, 'grade': 'LGG', 'idh': 1, 'pq': 0},
+            'hgg_idh_mutant_pq_intact': {'case': 1, 'grade': 'HGG', 'idh': 1, 'pq': 0},
             'lgg_idh_mutant_pq_codel': {'case': 1, 'grade': 'LGG', 'idh': 1, 'pq': 1}
         }
-        
+        # Error creating KM for onco-idhwt_scoring_system-hgg_idh_mutant_pq_intact: 'hgg_idh_mutant_pq_intact'
+
         for i, row in top_hits.iterrows():
             model = row['model']
             subtype = row['subtype']
@@ -349,9 +357,8 @@ def main():
                     scores_file = f"{args.data_dir}/{ds}.scores.z-scores.txt.gz"
                     cov_file = f"{args.data_dir}/{ds}-covariates.csv"
 
-
-                    
                     if Path(scores_file).exists() and Path(cov_file).exists():
+                        print(f"create_km_curves({model}, {subtype}, {ds}, {scores_file}, {cov_file}, {SUBTYPES[subtype]}, {args.output_dir})")
                         try:
                             create_km_curves(model, subtype, ds, scores_file, cov_file,
                                            SUBTYPES[subtype], args.output_dir)
@@ -363,4 +370,16 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+#	create_km_curves(idhwt_scoring_system, hgg_idh_mutant_pq_intact, tcga, ./tcga.scores.z-scores.txt.gz, ./tcga-covariates.csv, {'case': 1, 'grade': 'HGG', 'idh': 1, 'pq': 0}, results/plots)
+#	create_km_curves
+#	scores
+#	covariates
+#	sample_col
+#	scores.rename
+#	for loop
+#	  1 df: (20, 24)
+#	  2 df: (19, 24)   <-   20 is the cutoff
+#	Insufficient samples for KM plot: tcga - idhwt_scoring_system - hgg_idh_mutant_pq_intact
 
