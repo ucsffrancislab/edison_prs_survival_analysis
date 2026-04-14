@@ -29,12 +29,55 @@ fi
 # module load parallel
 
 # Set variables
-DATA_DIR="input"
-OUTPUT_DIR="results"
+#DATA_DIR="input"
+#OUTPUT_DIR="results"
+DATA_DIR="${1:-input}"
+OUTPUT_DIR="${2:-results}"
 MODEL_LIST="model_list.txt"
 N_JOBS=4  # One per dataset
 
-# Create output directory
+
+
+
+# ── Parse --outdir from args, collect remainder for Python ───────────────────
+DATA_DIR="input"
+OUTDIR="results"
+#PYTHON_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --datadir)
+            DATA_DIR="$2"
+            shift 2
+            ;;
+        --outdir)
+            OUTDIR="$2"
+            shift 2
+            ;;
+#        *)
+#            PYTHON_ARGS+=("$1")
+#            shift
+#            ;;
+    esac
+done
+
+if [[ -z "$OUTDIR" ]]; then
+    echo "ERROR: --outdir is required" >&2
+    echo "Usage: sbatch run_parallel_survival.sh --outdir <directory> [pipeline options]" >&2
+    exit 1
+fi
+
+# ── Create output directory ───────────────────────────────────────────────────
+mkdir -p "$OUTDIR"
+
+
+
+
+
+
+
+
+# ── Create output directory ───────────────────────────────────────────────────
 mkdir -p ${OUTPUT_DIR}
 mkdir -p logs
 
