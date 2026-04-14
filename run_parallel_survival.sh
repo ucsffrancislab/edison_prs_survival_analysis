@@ -29,7 +29,7 @@ fi
 # module load parallel
 
 # Set variables
-DATA_DIR="."
+DATA_DIR="input"
 OUTPUT_DIR="results"
 MODEL_LIST="model_list.txt"
 N_JOBS=4  # One per dataset
