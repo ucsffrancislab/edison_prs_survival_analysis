@@ -44,8 +44,8 @@ pip install lifelines
 ### Execution Scripts
 
 - `test_pipeline.sh` - Test pipeline on subset (RUN THIS FIRST)
-- `run_survival_analysis.sh` - SLURM array job script
-- `run_parallel_survival.sh` - SLURM single parallel job script
+- `archive/run_survival_analysis.sh` - SLURM array job script
+- `run_pipeline.sh` - SLURM single parallel job script
 
 ## Quick Start
 
@@ -89,10 +89,10 @@ python3 create_model_list.py \
     --output model_list.txt
 
 # Option A: Array job (4 separate jobs, one per dataset)
-sbatch run_survival_analysis.sh
+sbatch archve/run_survival_analysis.sh
 
 # Option B: Single parallel job (all datasets in one job)
-sbatch run_parallel_survival.sh
+sbatch run_pipeline.sh
 ```
 
 ## Analysis Details

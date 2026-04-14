@@ -15,8 +15,8 @@ CREATED FILES:
 2. Execution Scripts:
    - install_requirements.sh    : Install Python packages
    - test_pipeline.sh           : Test pipeline (RUN THIS FIRST!)
-   - run_survival_analysis.sh   : SLURM array job (4 jobs)
-   - run_parallel_survival.sh   : SLURM parallel job (1 job, 4 parallel tasks)
+   - archive/run_survival_analysis.sh   : SLURM array job (4 jobs)
+   - run_pipeline.sh   : SLURM parallel job (1 job, 4 parallel tasks)
 
 3. Documentation:
    - README.md                  : Detailed documentation
@@ -107,9 +107,9 @@ COMMAND SEQUENCE:
    python3 create_model_list.py --scores cidr.scores.z-scores.txt.gz --output model_list.txt
 
 5. Submit to SLURM:
-   sbatch run_survival_analysis.sh
+   sbatch archive/run_survival_analysis.sh
    OR
-   sbatch run_parallel_survival.sh
+   sbatch run_pipeline.sh
 
 6. Monitor:
    squeue -u $USER

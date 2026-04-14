@@ -26,7 +26,7 @@ python3 create_model_list.py \
     --output model_list.txt
 
 # Submit array job (4 jobs, one per dataset)
-sbatch run_survival_analysis.sh
+sbatch archive/run_survival_analysis.sh
 ```
 
 **Option B: Single Parallel Job** (For large multi-CPU nodes)
@@ -37,7 +37,7 @@ python3 create_model_list.py \
     --output model_list.txt
 
 # Submit single job that runs all datasets in parallel
-sbatch run_parallel_survival.sh
+sbatch run_pipeline.sh
 ```
 
 ### 4. Monitor Progress
@@ -75,8 +75,8 @@ scp -r your_server:path/to/results/plots/ ./
 ├── visualize_results.py          # Plotting script
 ├── create_model_list.py          # Helper to create model lists
 │
-├── run_survival_analysis.sh      # SLURM array job script
-├── run_parallel_survival.sh      # SLURM parallel job script
+├── archive/run_survival_analysis.sh      # SLURM array job script
+├── run_pipeline.sh      # SLURM parallel job script
 ├── test_pipeline.sh              # Test script (run first!)
 ├── install_requirements.sh       # Package installation
 │
@@ -143,7 +143,7 @@ python3 create_model_list.py \
     --output model_list_5pct.txt \
     --subset 0.05
 
-# Then edit run_survival_analysis.sh to use this file
+# Then edit archive/run_survival_analysis.sh to use this file
 # Change: MODEL_LIST="model_list_1pct.txt"
 ```
 
@@ -211,7 +211,7 @@ head test_results/*_survival_results.txt
 python3 create_model_list.py --scores cidr.scores.z-scores.txt.gz --output model_list_small.txt --subset 0.01
 
 # OR increase memory in SLURM script
-# Edit run_survival_analysis.sh:
+# Edit archive/run_survival_analysis.sh:
 #SBATCH --mem=64G  # Increase from 32G
 ```
 
