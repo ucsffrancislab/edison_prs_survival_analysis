@@ -11,6 +11,14 @@
 # PGS Survival Analysis - SLURM Array Job
 # This script runs survival analysis for one dataset per array task
 
+# ── Locate the directory this script lives in ────────────────────────────────
+if [[ -n "${SLURM_JOB_ID:-}" ]]; then
+    PIPELINE_DIR=$(dirname "$(scontrol show job "$SLURM_JOB_ID" \
+        | awk '/Command=/{sub(/.*Command=/, ""); print $1}')")
+else
+    PIPELINE_DIR="$(cd "$(dirname "$0")" && pwd)"
+fi
+
 # Activate your conda environment if needed
 # source activate your_env
 
@@ -33,15 +41,16 @@ DATASET=${DATASETS[$SLURM_ARRAY_TASK_ID]}
 echo "=================================================="
 echo "PGS Survival Analysis"
 echo "=================================================="
-echo "Dataset: ${DATASET}"
-echo "Job ID: ${SLURM_JOB_ID}"
-echo "Array Task ID: ${SLURM_ARRAY_TASK_ID}"
-echo "Running on host: $(hostname)"
-echo "Starting at: $(date)"
+echo "Dataset:      ${DATASET}"
+echo "Job ID:       ${SLURM_JOB_ID}"
+echo "Array Task:   ${SLURM_ARRAY_TASK_ID}"
+echo "Running on:   $(hostname)"
+echo "Pipeline dir: $PIPELINE_DIR"
+echo "Starting at:  $(date)"
 echo "=================================================="
 
 # Run survival analysis
-python3 survival_analysis.py \
+python3 "$PIPELINE_DIR/survival_analysis.py" \
     --dataset ${DATASET} \
     --scores ${DATA_DIR}/${DATASET}.scores.z-scores.txt.gz \
     --covariates ${DATA_DIR}/${DATASET}-covariates.tsv \

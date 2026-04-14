@@ -10,6 +10,17 @@
 # PGS Survival Analysis - Single Large Parallel Job
 # This script runs all datasets in parallel using GNU parallel
 
+# ── Locate the directory this script lives in ────────────────────────────────
+# Under SLURM, sbatch copies the script to a spool directory so dirname "$0"
+# points to the wrong place. Use scontrol to recover the original path.
+# Outside SLURM (interactive/local), dirname "$0" works fine.
+if [[ -n "${SLURM_JOB_ID:-}" ]]; then
+    PIPELINE_DIR=$(dirname "$(scontrol show job "$SLURM_JOB_ID" \
+        | awk '/Command=/{sub(/.*Command=/, ""); print $1}')")
+else
+    PIPELINE_DIR="$(cd "$(dirname "$0")" && pwd)"
+fi
+
 # Activate your conda environment if needed
 # source activate your_env
 
@@ -30,10 +41,11 @@ mkdir -p logs
 echo "=================================================="
 echo "PGS Survival Analysis (Parallel)"
 echo "=================================================="
-echo "Job ID: ${SLURM_JOB_ID}"
-echo "CPUs: ${SLURM_CPUS_PER_TASK}"
-echo "Running on host: $(hostname)"
-echo "Starting at: $(date)"
+echo "Job ID:       ${SLURM_JOB_ID:-local}"
+echo "CPUs:         ${SLURM_CPUS_PER_TASK:-$(nproc)}"
+echo "Running on:   $(hostname)"
+echo "Pipeline dir: $PIPELINE_DIR"
+echo "Starting at:  $(date)"
 echo "=================================================="
 
 # Function to run analysis for one dataset
@@ -41,7 +53,7 @@ run_dataset() {
     DATASET=$1
     echo "Starting analysis for ${DATASET}..."
     
-    python3 survival_analysis.py \
+    python3 "$PIPELINE_DIR/survival_analysis.py" \
         --dataset ${DATASET} \
         --scores ${DATA_DIR}/${DATASET}.scores.z-scores.txt.gz \
         --covariates ${DATA_DIR}/${DATASET}-covariates.csv \
@@ -53,7 +65,7 @@ run_dataset() {
 }
 
 export -f run_dataset
-export DATA_DIR OUTPUT_DIR MODEL_LIST
+export DATA_DIR OUTPUT_DIR MODEL_LIST PIPELINE_DIR
 
 # Run all datasets in parallel
 parallel -j ${N_JOBS} run_dataset ::: cidr i370 onco tcga
@@ -64,7 +76,7 @@ echo "=================================================="
 
 # Run meta-analysis
 echo "Starting meta-analysis..."
-python3 meta_analysis.py \
+python3 "$PIPELINE_DIR/meta_analysis.py" \
     --input ${OUTPUT_DIR}/cidr_survival_results.txt \
             ${OUTPUT_DIR}/i370_survival_results.txt \
             ${OUTPUT_DIR}/onco_survival_results.txt \
@@ -76,7 +88,7 @@ echo "=================================================="
 
 # Generate visualizations
 echo "Generating visualizations..."
-python3 visualize_results.py \
+python3 "$PIPELINE_DIR/visualize_results.py" \
     --meta ${OUTPUT_DIR}/meta_analysis_results.txt \
     --output-dir ${OUTPUT_DIR}/plots \
     --top-n 100 \

@@ -5,9 +5,18 @@
 
 set -e  # Exit on error
 
+# ── Locate the directory this script lives in ────────────────────────────────
+if [[ -n "${SLURM_JOB_ID:-}" ]]; then
+    PIPELINE_DIR=$(dirname "$(scontrol show job "$SLURM_JOB_ID" \
+        | awk '/Command=/{sub(/.*Command=/, ""); print $1}')")
+else
+    PIPELINE_DIR="$(cd "$(dirname "$0")" && pwd)"
+fi
+
 echo "=================================================="
 echo "PGS Survival Analysis - Test Pipeline"
 echo "=================================================="
+echo "Pipeline dir: $PIPELINE_DIR"
 echo "Starting at: $(date)"
 echo ""
 
@@ -20,7 +29,7 @@ mkdir -p logs
 # Step 1: Create test model list (3% of models)
 echo ""
 echo "Step 1: Creating test model list (3% of models)..."
-python3 create_model_list.py \
+python3 "$PIPELINE_DIR/create_model_list.py" \
     --scores cidr.scores.z-scores.txt.gz \
     --output test_model_list.txt \
     --subset 0.03
@@ -37,7 +46,7 @@ for DATASET in cidr i370 onco tcga; do
     echo ""
     echo "  Analyzing ${DATASET}..."
     
-    python3 survival_analysis.py \
+    python3 "$PIPELINE_DIR/survival_analysis.py" \
         --dataset ${DATASET} \
         --scores ${DATASET}.scores.z-scores.txt.gz \
         --covariates ${DATASET}-covariates.csv \
@@ -58,7 +67,7 @@ done
 echo ""
 echo "Step 3: Running meta-analysis..."
 
-python3 meta_analysis.py \
+python3 "$PIPELINE_DIR/meta_analysis.py" \
     --input test_results/cidr_survival_results.txt \
             test_results/i370_survival_results.txt \
             test_results/onco_survival_results.txt \
@@ -77,7 +86,7 @@ fi
 echo ""
 echo "Step 4: Generating visualizations..."
 
-python3 visualize_results.py \
+python3 "$PIPELINE_DIR/visualize_results.py" \
     --meta test_results/meta_analysis_results.txt \
     --output-dir test_results/plots \
     --top-n 10 \
@@ -113,10 +122,10 @@ echo ""
 echo "Next steps:"
 echo "1. Review test results in test_results/ directory"
 echo "2. If satisfied, create full model list:"
-echo "   python3 create_model_list.py --scores cidr.scores.z-scores.txt.gz --output model_list.txt"
+echo "   python3 $PIPELINE_DIR/create_model_list.py --scores cidr.scores.z-scores.txt.gz --output model_list.txt"
 echo ""
 echo "3. Submit full analysis to SLURM:"
-echo "   sbatch run_survival_analysis.sh  (for array job)"
+echo "   sbatch $PIPELINE_DIR/run_survival_analysis.sh  (for array job)"
 echo "   OR"
-echo "   sbatch run_parallel_survival.sh  (for single parallel job)"
+echo "   sbatch $PIPELINE_DIR/run_parallel_survival.sh  (for single parallel job)"
 echo ""
