@@ -1,11 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=pgs_survival_parallel
-#SBATCH --output=survival_parallel_%j.out
-#SBATCH --error=survival_parallel_%j.err
+#SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=64
-#SBATCH --mem=490G
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=240G
 #SBATCH --time=14-0
+#SBATCH --output=/dev/null
+#SBATCH --error=/dev/null
 
 # PGS Survival Analysis - Single Large Parallel Job
 # This script runs all datasets in parallel using GNU parallel
@@ -65,7 +66,12 @@ fi
 
 # ── Create output directory ───────────────────────────────────────────────────
 mkdir -p ${OUTPUT_DIR}
-mkdir -p logs
+#mkdir -p logs
+
+# ── Redirect all subsequent stdout/stderr to a log file in outdir ────────────
+exec > "${OUTPUT_DIR}/pipeline.out.txt" 2>&1
+
+
 
 echo "=================================================="
 echo "PGS Survival Analysis (Parallel)"
@@ -87,8 +93,8 @@ run_dataset() {
         --scores ${DATA_DIR}/${DATASET}.scores.z-scores.txt.gz \
         --covariates ${DATA_DIR}/${DATASET}-covariates.csv \
         --models ${MODEL_LIST} \
-        --output ${OUTPUT_DIR}/${DATASET}_survival_results.txt \
-        > logs/${DATASET}_survival.log 2>&1
+        --output ${OUTPUT_DIR}/${DATASET}_survival_results.txt #\
+        #> logs/${DATASET}_survival.log 2>&1
     
     echo "Completed analysis for ${DATASET}"
 }
