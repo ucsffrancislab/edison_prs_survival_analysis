@@ -339,11 +339,19 @@ def main():
         #    'lgg_idh_mutant_pq_codel': {'case': 1, 'grade': 'LGG', 'idh': 1, 'pq': 1}
         #}
         
+        #SUBTYPES = {
+        #    'idh_wildtype': {'case': 1, 'idh': 0},
+        #    'lgg_idh_mutant_pq_intact': {'case': 1, 'grade': 'LGG', 'idh': 1, 'pq': 0},
+        #    'hgg_idh_mutant_pq_intact': {'case': 1, 'grade': 'HGG', 'idh': 1, 'pq': 0},
+        #    'lgg_idh_mutant_pq_codel': {'case': 1, 'grade': 'LGG', 'idh': 1, 'pq': 1}
+        #}
+
+        # This should only be in 1 place, but alas it is in 2
         SUBTYPES = {
-            'idh_wildtype': {'case': 1, 'idh': 0},
-            'lgg_idh_mutant_pq_intact': {'case': 1, 'grade': 'LGG', 'idh': 1, 'pq': 0},
-            'hgg_idh_mutant_pq_intact': {'case': 1, 'grade': 'HGG', 'idh': 1, 'pq': 0},
-            'lgg_idh_mutant_pq_codel': {'case': 1, 'grade': 'LGG', 'idh': 1, 'pq': 1}
+            'idh_wildtype':         {'case': 1, 'idh': 0},
+            'idh_mutant':           {'case': 1, 'idh': 1},
+            'idh_mutant_pq_intact': {'case': 1, 'idh': 1, 'pq': 0},
+            'idh_mutant_pq_codel':  {'case': 1, 'idh': 1, 'pq': 1}
         }
         # Error creating KM for onco-idhwt_scoring_system-hgg_idh_mutant_pq_intact: 'hgg_idh_mutant_pq_intact'
 
